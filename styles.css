@@ -1,13 +1,32 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 body {
   font-family: system-ui, -apple-system, sans-serif;
   background-color: #f4f4f9;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
+  padding: 24px 16px;
+}
+.poll-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
 }
 .poll-container {
+  background: #ffffff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+.results-chart {
   background: #ffffff;
   padding: 24px 28px;
   border-radius: 12px;
@@ -52,27 +71,53 @@ button {
 button:hover {
   background-color: #15803d;
 }
-.result-item {
-  margin-bottom: 14px;
-}
-.result-label {
+.bar-chart {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-  font-weight: 500;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 12px;
+  min-height: 190px;
+  margin: 20px 0 12px;
+  padding: 12px 8px 0;
+  border-bottom: 1px solid #e5e7eb;
 }
-.progress-bar-bg {
-  background: #e5e7eb;
-  border-radius: 6px;
-  height: 10px;
+.chart-item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  height: 190px;
+}
+.chart-value {
+  min-height: 1.2em;
+  color: #555;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.bar-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 56px;
+  height: 140px;
   overflow: hidden;
+  background: #f3f4f6;
+  border-radius: 6px 6px 0 0;
 }
-.progress-bar-fill {
+.bar-fill {
+  width: 100%;
   background: #4f46e5;
-  height: 100%;
-  width: 0%;
-  transition: width 0.4s ease;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.4s ease;
+}
+.chart-label {
+  color: #333;
+  font-size: 0.8rem;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 .total-votes {
   font-size: 0.85rem;
@@ -80,13 +125,29 @@ button:hover {
   margin-top: 12px;
   text-align: right;
 }
-.reset-btn {
-  background-color: #e5e7eb;
-  color: #333;
-  margin-top: 12px;
+.poll-status {
+  margin: 12px 0 0;
+  color: #555;
   font-size: 0.85rem;
-  padding: 8px;
+  overflow-wrap: anywhere;
 }
-.reset-btn:hover {
-  background-color: #d1d5db;
+.poll-status.error {
+  color: #b91c1c;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+@media (max-width: 360px) {
+  .results-chart {
+    padding: 20px 16px;
+  }
+  .bar-chart {
+    gap: 6px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+  .chart-label {
+    font-size: 0.72rem;
+  }
 }
