@@ -9,4 +9,4 @@ The page uses Supabase to store shared vote totals. The SQL creates the table an
 
 The public key is intended for browser use; never put a `service_role` key in this project. Row-level security lets visitors read totals and submit votes only through the validated database function.
 
-The browser remembers that it has voted using local storage. This prevents repeat voting in the same browser profile, but is not a strong identity or abuse-prevention mechanism. The poll starts with zero database votes; local-only totals from the old version are not imported.
+The form remains available after each successful vote. The chart updates immediately and refreshes every 15 seconds while the page is visible so other visitors' votes appear too. Anyone can submit repeatedly; this is not a one-person poll or an abuse-prevention mechanism. The poll starts with zero database votes; local-only totals from the old version are not imported.

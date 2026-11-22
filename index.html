@@ -30,13 +30,13 @@
 
 <script>
   const defaultVotes = { "TUV Nord": 0, "TUV Rheinland": 0, "TUV Sud": 0 };
-  const voteStorageKey = 'hasVotedSharedPoll';
   const config = window.POLL_DATABASE_CONFIG || {};
   const supabaseUrl = String(config.projectUrl || '').trim().replace(/\/+$/, '');
   const supabaseKey = String(config.publicKey || '').trim();
   let votes = { ...defaultVotes };
-  let hasVoted = localStorage.getItem(voteStorageKey) === 'true';
   let databaseReady = false;
+  let isSubmitting = false;
+  let resultsRevision = 0;
 
   const form = document.getElementById('poll-form');
   const voteButton = form.querySelector('button[type="submit"]');
@@ -44,7 +44,6 @@
   const totalVotesEl = document.getElementById('total-votes');
   const pollStatus = document.getElementById('poll-status');
 
-  form.hidden = hasVoted;
   voteButton.disabled = true;
 
   if (!isValidConfiguration()) {
@@ -54,11 +53,19 @@
     refreshResults().catch(error => {
       setStatus(`Could not load poll results: ${error.message}`, true);
     });
+    window.setInterval(() => {
+      if (isSubmitting || document.visibilityState !== 'visible') {
+        return;
+      }
+      refreshResults().catch(error => {
+        setStatus(`Could not refresh poll results: ${error.message}`, true);
+      });
+    }, 15000);
   }
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
-    if (!databaseReady || hasVoted) {
+    if (!databaseReady || isSubmitting) {
       return;
     }
 
@@ -68,6 +75,8 @@
       return;
     }
 
+    isSubmitting = true;
+    resultsRevision++;
     voteButton.disabled = true;
     setStatus('Submitting your vote…');
     try {
@@ -77,18 +86,13 @@
         body: JSON.stringify({ p_option: selected.value })
       });
       applyResults(rows);
-      hasVoted = true;
-      form.hidden = true;
-      try {
-        localStorage.setItem(voteStorageKey, 'true');
-        setStatus('Vote recorded.');
-      } catch (error) {
-        setStatus(`Vote recorded, but this browser could not save the one-vote marker: ${error.message}`, true);
-      }
+      form.reset();
+      setStatus('Vote recorded. You can submit another vote.');
     } catch (error) {
       setStatus(`Could not record your vote: ${error.message}`, true);
     } finally {
-      voteButton.disabled = hasVoted || !databaseReady;
+      isSubmitting = false;
+      voteButton.disabled = !databaseReady;
     }
   });
 
@@ -157,10 +161,14 @@
   }
 
   async function refreshResults() {
+    const revision = ++resultsRevision;
     const rows = await supabaseRequest('poll_votes?select=poll_option,vote_count&order=poll_option.asc');
+    if (revision !== resultsRevision || isSubmitting) {
+      return;
+    }
     applyResults(rows);
     databaseReady = true;
-    voteButton.disabled = hasVoted;
+    voteButton.disabled = false;
     setStatus('');
   }
 
